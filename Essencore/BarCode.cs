@@ -170,6 +170,8 @@ namespace Essencore
             var DTR = string.IsNullOrEmpty(barcode_details.DTR) ? string.Empty : barcode_details .DTR;
             var Latency = string.IsNullOrEmpty(barcode_details.Latency) ? string.Empty : barcode_details.Latency;
             var YearWeek = GetSerialWeek(DateTime.Now);
+            var combinedSerialNumber = $"{DDR} {DIMM} {Density} {DTR} {Rank}";
+            var QR = $"{Model}  {YearWeek} {cus_no}";
 
 
             if (Model != string.Empty && cus_no != string.Empty)
@@ -177,16 +179,18 @@ namespace Essencore
 
                 var externalValues = new Dictionary<string, string>
         {
-            { "SerialNumber", cus_no },
-            { "Model", Model },
-            {"DDR",DDR },
-            {"Density",Density },
-            {"DIMM",DIMM },
-            {"DTR",DTR },
+            {"SerialNumber", cus_no  },
+            {"Model", Model },
+            {"DDR",combinedSerialNumber },
+           // {"Density",Density },
+          //  {"DIMM",DIMM },
+            //{"DTR",DTR },
             {"Latency",Latency },
-            {"Rank",Rank },
+          //  {"Rank",Rank },
             {"Country",Country },
             {"YEARWEEK",YearWeek },
+            {"QR",QR },
+
         };
 
                 PrintLabel(labelFormatPath, externalValues);
