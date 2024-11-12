@@ -42,7 +42,11 @@ namespace Essencore
         public string duplicate {  get; set; }
 
         public string ProviderID { get; set; }
-        
+        class UserDetails
+        {
+            public string emp_id { get; set; }
+        }
+
 
     }
 }

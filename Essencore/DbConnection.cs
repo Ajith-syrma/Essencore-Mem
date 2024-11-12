@@ -17,7 +17,7 @@ namespace Essencore
         SqlDataAdapter adapter;
         SqlDataReader reader;
         DataTable dt;
-        public BarcodeDetails DbConnect(string barcode)
+        public BarcodeDetails DbConnect(string barcode, int labelid, string emp_id,string Work_Orderno)
         {
             BarcodeDetails details = new BarcodeDetails();
             try
@@ -26,6 +26,9 @@ namespace Essencore
                 cmd = new SqlCommand("pro_getCustomerSerialNoEssencore", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@pcbserialno", barcode);
+                cmd.Parameters.AddWithValue("@labelmasterid", labelid);
+                cmd.Parameters.AddWithValue("@user_id", emp_id);
+                cmd.Parameters.AddWithValue("@Work_Orderno", Work_Orderno);
                 con.Open();
                 //var reader = cmd.ExecuteScalar();
                 //con.Close();
@@ -62,7 +65,35 @@ namespace Essencore
             }
         }
 
-        public List<BarcodeDetails> GetBarcodeDetails(string productno)
+
+        public List<string> getWorkOrderDetails(int labelid)
+        {
+            var listWorkOrderNos = new List<string>();
+            try
+            {
+                cmd = new SqlCommand("get_WorkOrderDetailsSSD", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@labelID", labelid);
+                adapter = new SqlDataAdapter(cmd);
+                dt = new DataTable();
+                adapter.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        listWorkOrderNos.Add(dr["WorkOrderNo"].ToString());
+                    }
+                }
+                return listWorkOrderNos;
+            }
+            catch (Exception ex)
+            {
+                return listWorkOrderNos;
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
+
+        public List<BarcodeDetails> GetBarcodeDetails(int labelid)
         {
             var list = new List<BarcodeDetails>();
             try
@@ -72,6 +103,7 @@ namespace Essencore
                 //cmd = new SqlCommand("pro_getPrintedValue", con);
                 cmd = new SqlCommand("pro_getPrintedValueEssencore", con);
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@labelmasterid", labelid);
                 adapter = new SqlDataAdapter(cmd);
                 dt = new DataTable();
                 adapter.Fill(dt);
@@ -124,7 +156,7 @@ namespace Essencore
 
         }
 
-        public BarcodeDetails GetProductDetails(int labelid)
+        public BarcodeDetails GetProductDetails(int labelid, string workorderno)
         {
             var barCodeDetils = new BarcodeDetails();
             try
@@ -134,6 +166,7 @@ namespace Essencore
                 cmd = new SqlCommand("get_ProductNoEssencore", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@labelid", labelid);
+                cmd.Parameters.AddWithValue("@WorkOrderNo", workorderno);
                 adapter = new SqlDataAdapter(cmd);
                 dt = new DataTable();
                 adapter.Fill(dt);

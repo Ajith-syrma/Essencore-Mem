@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using BarTender;
 using System.Globalization;
+using System.Diagnostics.Eventing.Reader;
 
 
 namespace Essencore
@@ -16,14 +17,18 @@ namespace Essencore
         private System.Windows.Forms.Timer blinkTimer;
         private bool isBlinking;
         private Color originalColor;
+        private string emp_id;
 
-        public frmBarcode()
+        public frmBarcode(string emp_id)
         {
             InitializeComponent();
             DisplayWeekNumber();
+            this.emp_id = emp_id;
+            lbluserid.Text = this.emp_id;
 
             this.KeyPreview = true;
-
+            FormBorderStyle = FormBorderStyle.None;
+            WindowState = FormWindowState.Maximized;
         }
 
 
@@ -48,72 +53,59 @@ namespace Essencore
         }
 
 
-        private void lblBarcode_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnBarcodePrint_Click(object sender, EventArgs e)
-        {
-
-
-        }
-
-
         //----Db coonection for serial and product number without duplicates----//
-        private void ProcessBarcode(string barcode)
+        private void ProcessBarcode(string barcode, int labelid, string emp_id, string Work_Orderno)
         {
-            try
+            if (cmbProductType.SelectedIndex != 0 && cmbWorkOrderNo.SelectedValue.ToString() != "Select")
             {
-                if (cmbProductType.SelectedIndex != 0)
+                var bcode = getConn.DbConnect(barcode, labelid, emp_id, Work_Orderno);
+
+                if (bcode.duplicate != "Duplicate" && bcode.duplicate != "NotFound")
                 {
-                    var bcode = getConn.DbConnect(barcode);
 
-                    if (bcode.duplicate != "Duplicate" && bcode.duplicate != "NotFound")
-                    {
-
-                        rtbInstruction.Text = "Print Started";
-                        rtbInstruction.Font = new Font("Showcard Gothic", 12f);
-                        rtbInstruction.BackColor = Color.LightGoldenrodYellow;
-                        DataBindings();
-                        PrintLabelBarcode(lblProductNo.Text.ToString(), bcode);
+                    rtbInstruction.Text = "Print Started";
+                    rtbInstruction.Font = new Font("Showcard Gothic", 12f);
+                    rtbInstruction.BackColor = Color.LightGoldenrodYellow;
+                    DataBindings();
+                    printLabelBarcode(lblProductNo.Text.ToString(), bcode);
 
 
-                        rtbInstruction.BackColor = Color.Empty;
-                        txtCustomerSerialNo.Text = bcode.CustomerSerialNo.ToString();
-                    }
-                    else if (bcode.duplicate == "Duplicate")
-                    {
-
-                        txtPCBSerialNo.BackColor = Color.OrangeRed;
-
-                        blinkTimer = new System.Windows.Forms.Timer
-                        {
-                            Interval = 500 // Set the interval to 500 milliseconds (0.5 seconds)
-                        };
-                        blinkTimer.Tick += (s, args) => BlinkTextBox();
-                        blinkTimer.Start();
-                        rtbInstruction.Text = "Duplicate";
-                        rtbInstruction.BackColor = Color.OrangeRed;
-                        rtbInstruction.Font = new Font("Showcard Gothic", 12f);
-                    }
-                    else if (bcode.duplicate == "NotFound")
-                    {
-                        rtbInstruction.Text = "PCB Serial No Not Fount";
-                        rtbInstruction.BackColor = Color.Gray;
-                        rtbInstruction.Font = new Font("Showcard Gothic", 12f);
-                    }
+                    rtbInstruction.BackColor = Color.Empty;
+                    txtCustomerSerialNo.Text = bcode.ToString();
                 }
-                else if (cmbProductType.SelectedIndex == 0)
+                else if (bcode.duplicate == "Duplicate")
                 {
-                    MessageBox.Show("Please Select the Product Type");
+
+                    txtPCBSerialNo.BackColor = Color.OrangeRed;
+
+                    blinkTimer = new System.Windows.Forms.Timer
+                    {
+                        Interval = 500 // Set the interval to 500 milliseconds (0.5 seconds)
+                    };
+                    blinkTimer.Tick += (s, args) => BlinkTextBox();
+                    blinkTimer.Start();
+                    rtbInstruction.Text = "Duplicate";
+                    rtbInstruction.BackColor = Color.OrangeRed;
+                    rtbInstruction.Font = new Font("Showcard Gothic", 12f);
+                }
+                else if (bcode.duplicate == "NotFound")
+                {
+                    rtbInstruction.Text = "PCB Serial Not Found!" + Environment.NewLine + "or Product Type Mismatch!"
+                                                  + Environment.NewLine + "Please Enter or Select valid value";
+                    rtbInstruction.BackColor = Color.Gray;
+                    rtbInstruction.Font = new Font("Showcard Gothic", 12f);
                 }
             }
-            catch(Exception ex)
+            else if (cmbProductType.SelectedIndex == 0)
             {
-                MessageBox.Show(ex.Message);
-                
+                MessageBox.Show("Please Select the Product Type");
             }
+            else if (cmbWorkOrderNo.SelectedValue.ToString() == "Select")
+            {
+                MessageBox.Show("Please select the WorkOrder Number ");
+            }
+
+
         }
 
         private void BlinkTextBox()
@@ -144,7 +136,7 @@ namespace Essencore
             txtPCBSerialNo.Focus();
             txtPCBSerialNo.Text = string.Empty;
             txtCustomerPartNo.Text = string.Empty;
-            txtWorkorderNo.Text = string.Empty;
+            cmbWorkOrderNo.Text = "Select";
             txtDescription.Text = string.Empty;
             cmbProductType.SelectedIndex = 0;
             rtbInstruction.Text = string.Empty;
@@ -153,21 +145,21 @@ namespace Essencore
         }
 
 
-        public void PrintLabelBarcode(string productno, BarcodeDetails barcode_details)
+        public void printLabelBarcode(string productno, BarcodeDetails barcode_details)
         {
- 
-            string labelFormatPath = @"D:\Essencore_New.btw";
+
+            string labelFormatPath = @"D:\Essencore_updated.btw";
 
 
             var Model = string.IsNullOrEmpty(barcode_details.Model) ? string.Empty : barcode_details.Model;
             var cus_no = string.IsNullOrEmpty(barcode_details.CustomerSerialNo) ? string.Empty : barcode_details.CustomerSerialNo;
             var Voltage = string.IsNullOrEmpty(barcode_details.Voltage) ? string.Empty : barcode_details.Voltage;
             var Rank = string.IsNullOrEmpty(barcode_details.Rank1) ? string.Empty : barcode_details.Rank1;
-            var Country = string.IsNullOrEmpty(barcode_details.Country) ? string.Empty : barcode_details .Country;
-            var DDR = string.IsNullOrEmpty(barcode_details.DDR) ? string.Empty : barcode_details .DDR;
-            var Density = string.IsNullOrEmpty(barcode_details.Density) ? string.Empty : barcode_details .Density;
-            var DIMM = string.IsNullOrEmpty(barcode_details.DIMM) ? string.Empty : barcode_details. DIMM;
-            var DTR = string.IsNullOrEmpty(barcode_details.DTR) ? string.Empty : barcode_details .DTR;
+            var Country = string.IsNullOrEmpty(barcode_details.Country) ? string.Empty : barcode_details.Country;
+            var DDR = string.IsNullOrEmpty(barcode_details.DDR) ? string.Empty : barcode_details.DDR;
+            var Density = string.IsNullOrEmpty(barcode_details.Density) ? string.Empty : barcode_details.Density;
+            var DIMM = string.IsNullOrEmpty(barcode_details.DIMM) ? string.Empty : barcode_details.DIMM;
+            var DTR = string.IsNullOrEmpty(barcode_details.DTR) ? string.Empty : barcode_details.DTR;
             var Latency = string.IsNullOrEmpty(barcode_details.Latency) ? string.Empty : barcode_details.Latency;
             var YearWeek = GetSerialWeek(DateTime.Now);
             var combinedSerialNumber = $"{DDR} {DIMM} {Density} {DTR} {Rank}";
@@ -203,6 +195,7 @@ namespace Essencore
             }
 
         }
+
 
         public void PrintLabel(string labelFormatPath, Dictionary<string, string> values)
         {
@@ -262,7 +255,9 @@ namespace Essencore
             {
                 // Process the barcode
                 //  ProcessBarcode(barcodeData.ToString());
-                ProcessBarcode(txtPCBSerialNo.Text);
+                int labelid = Convert.ToInt32(cmbProductType.SelectedValue);
+                string Work_Orderno = cmbWorkOrderNo.SelectedValue.ToString().Trim();
+                ProcessBarcode(txtPCBSerialNo.Text, labelid, this.emp_id, Work_Orderno);
 
                 barcodeData.Clear();
             }
@@ -279,7 +274,8 @@ namespace Essencore
             {
 
                 string productNo = lblProductNo.Text.ToString();
-                var barcodedetails = getConn.GetBarcodeDetails(productNo);
+                int labelid = Convert.ToInt32(cmbProductType.SelectedValue);
+                var barcodedetails = getConn.GetBarcodeDetails(labelid);
                 dgvBarcodeDetails.DataSource = barcodedetails;
                 dgvBarcodeDetails.Columns["Model"].Width = 250;
                 dgvBarcodeDetails.Columns["CustomerSerialNo"].Width = 250;
@@ -334,24 +330,11 @@ namespace Essencore
             {
                 if (cmbProductType.SelectedIndex != 0)
                 {
-                    int labelid = Convert.ToInt32(cmbProductType.SelectedValue);
-                    var productdetails = getConn.GetProductDetails(labelid);
-                    if (productdetails.WorkOrderNo != null)
+                    int labelid = Convert.ToInt32(cmbProductType.SelectedValue.ToString());
+                    var listNos = getConn.getWorkOrderDetails(labelid);
+                    if (listNos != null && listNos.Count > 0)
                     {
-                        txtWorkorderNo.Text = productdetails.WorkOrderNo;
-                        txtCustomerPartNo.Text = productdetails.CustomerPartNo;
-                        txtDescription.Text = productdetails.Bar_Description;
-                        lblProductNo.Text = productdetails.Model;
-                        DataBindings();
-                        txtPCBSerialNo.Focus();
-                    }
-                    else
-                    {
-                        dgvBarcodeDetails.Columns.Clear();
-                        txtWorkorderNo.Text = string.Empty;
-                        txtCustomerPartNo.Text = string.Empty;
-                        txtDescription.Text = string.Empty;
-                        lblProductNo.Text = string.Empty;
+                        cmbWorkOrderNo.DataSource = listNos;
                     }
                 }
                 else
@@ -363,6 +346,29 @@ namespace Essencore
             }
             catch (Exception ex)
             { MessageBox.Show(ex.Message.ToString()); }
+        }
+
+        public void getFGDetails()
+        {
+            int labelid = Convert.ToInt32(cmbProductType.SelectedValue);
+            var productdetails = getConn.GetProductDetails(labelid, cmbWorkOrderNo.SelectedValue.ToString());
+            if (productdetails.WorkOrderNo != null)
+            {
+                //txtWorkorderNo.Text = productdetails.WorkOrderNo;
+                txtCustomerPartNo.Text = productdetails.CustomerPartNo;
+                txtDescription.Text = productdetails.Bar_Description;
+                lblProductNo.Text = productdetails.Model;
+                DataBindings();
+                txtPCBSerialNo.Focus();
+            }
+            else
+            {
+                dgvBarcodeDetails.Columns.Clear();
+                //txtWorkorderNo.Text = string.Empty;
+                txtCustomerPartNo.Text = string.Empty;
+                txtDescription.Text = string.Empty;
+                lblProductNo.Text = string.Empty;
+            }
         }
 
         static string GetSerialWeek(DateTime date)
@@ -388,19 +394,23 @@ namespace Essencore
             return formattedOutput; // Return the formatted string
         }
 
-        private void label13_Click(object sender, EventArgs e)
+        private void cmbWorkOrderNo_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            try
+            {
+                if (cmbWorkOrderNo.SelectedValue.ToString() != "Select" && cmbWorkOrderNo.Text != string.Empty)
+                    getFGDetails();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
         }
 
-        private void lblWeekNumber_Click(object sender, EventArgs e)
+        private void btnExit_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void label10_Click(object sender, EventArgs e)
-        {
-
+            //Application.Exit();
+            this.Close();
         }
     }
 
