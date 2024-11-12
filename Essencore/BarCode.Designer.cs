@@ -205,7 +205,7 @@
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Showcard Gothic", 12F);
-            label9.Location = new Point(451, 76);
+            label9.Location = new Point(454, 76);
             label9.Name = "label9";
             label9.Size = new Size(73, 20);
             label9.TabIndex = 19;
@@ -275,7 +275,7 @@
             // 
             label12.AutoSize = true;
             label12.Font = new Font("Showcard Gothic", 12F);
-            label12.Location = new Point(953, 39);
+            label12.Location = new Point(953, 14);
             label12.Name = "label12";
             label12.Size = new Size(70, 20);
             label12.TabIndex = 29;
@@ -286,7 +286,7 @@
             lbluserid.AllowDrop = true;
             lbluserid.AutoSize = true;
             lbluserid.Font = new Font("Showcard Gothic", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lbluserid.Location = new Point(1028, 40);
+            lbluserid.Location = new Point(1028, 15);
             lbluserid.Name = "lbluserid";
             lbluserid.Size = new Size(71, 18);
             lbluserid.TabIndex = 30;
