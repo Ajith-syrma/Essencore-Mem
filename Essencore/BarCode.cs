@@ -357,7 +357,7 @@ namespace Essencore
                 //txtWorkorderNo.Text = productdetails.WorkOrderNo;
                 txtCustomerPartNo.Text = productdetails.CustomerPartNo;
                 txtDescription.Text = productdetails.Bar_Description;
-                lblProductNo.Text = productdetails.Model;
+                //lblProductNo.Text = productdetails.Model;
                 DataBindings();
                 txtPCBSerialNo.Focus();
             }

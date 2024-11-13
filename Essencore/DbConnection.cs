@@ -177,7 +177,7 @@ namespace Essencore
                     barCodeDetils.CustomerPartNo = dt.Rows[0]["CustomerPartNo"].ToString();
                     barCodeDetils.Bar_Description = dt.Rows[0]["Bar_Description"].ToString();
                     barCodeDetils.WeekDetails = Convert.ToInt32(dt.Rows[0]["WeekDetails"].ToString());
-                    //barCodeDetils.Model = dt.Rows[0]["Model"].ToString();
+                   // barCodeDetils.Model = dt.Rows[0]["Model"].ToString();
                 }
                 //con.Open();
                 //result = Convert.ToString(cmd.ExecuteScalar());
