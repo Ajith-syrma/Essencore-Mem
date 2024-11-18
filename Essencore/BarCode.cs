@@ -72,7 +72,7 @@ namespace Essencore
 
 
                     rtbInstruction.BackColor = Color.Empty;
-                    txtCustomerSerialNo.Text = bcode.ToString();
+                    txtCustomerSerialNo.Text = bcode.CustomerSerialNo.ToString();
                 }
                 else if (bcode.duplicate == "Duplicate")
                 {
@@ -163,6 +163,7 @@ namespace Essencore
             var DTR = string.IsNullOrEmpty(barcode_details.DTR) ? string.Empty : barcode_details.DTR;
             var Latency = string.IsNullOrEmpty(barcode_details.Latency) ? string.Empty : barcode_details.Latency;
             var YearWeek = GetSerialWeek(DateTime.Now);
+            var Latencyvoltage =$"{Latency} {Voltage}";
             var combinedSerialNumber = $"{DDR} {DIMM} {Density} {DTR} {Rank}";
             var QR = $"{Model}  {YearWeek} {cus_no}";
 
@@ -178,7 +179,7 @@ namespace Essencore
            // {"Density",Density },
           //  {"DIMM",DIMM },
             //{"DTR",DTR },
-            {"Latency",Latency },
+            {"Latency",Latencyvoltage },
           //  {"Rank",Rank },
             {"Country",Country },
             {"YEARWEEK",YearWeek },
