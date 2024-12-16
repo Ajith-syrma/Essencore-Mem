@@ -54,6 +54,7 @@ namespace Essencore
                         details.Voltage = dtable.Rows[0]["Voltage"].ToString();
                         details.Country = dtable.Rows[0]["Country"].ToString();
                         details.labeltype = dtable.Rows[0]["labeltype"].ToString();
+                        details.WeekDetails = (int)dtable.Rows[0]["WeekDetails"];
                     }
                 }
                 return details;

@@ -162,7 +162,8 @@ namespace Essencore
             var DIMM = string.IsNullOrEmpty(barcode_details.DIMM) ? string.Empty : barcode_details.DIMM;
             var DTR = string.IsNullOrEmpty(barcode_details.DTR) ? string.Empty : barcode_details.DTR;
             var Latency = string.IsNullOrEmpty(barcode_details.Latency) ? string.Empty : barcode_details.Latency;
-            var YearWeek = GetSerialWeek(DateTime.Now);
+            //var YearWeek = GetSerialWeek(DateTime.Now);
+            var YearWeek = barcode_details.WeekDetails.ToString();
             var Latencyvoltage =$"{Latency} {Voltage}";
             var combinedSerialNumber = $"{DDR} {DIMM} {Density} {DTR} {Rank}";
             var QR = $"{Model}  {YearWeek} {cus_no}";
