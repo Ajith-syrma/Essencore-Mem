@@ -149,13 +149,13 @@ namespace Essencore
         public void printLabelBarcode(string productno, BarcodeDetails barcode_details)
         {
 
-            string labelFormatPath = @"D:\Essencore_updated.btw";
+            string labelFormatPath = @"D:\Essencore_Mem.btw";
 
 
             var Model = string.IsNullOrEmpty(barcode_details.Model) ? string.Empty : barcode_details.Model;
             var cus_no = string.IsNullOrEmpty(barcode_details.CustomerSerialNo) ? string.Empty : barcode_details.CustomerSerialNo;
             var Voltage = string.IsNullOrEmpty(barcode_details.Voltage) ? string.Empty : barcode_details.Voltage;
-            var Rank = string.IsNullOrEmpty(barcode_details.Rank1) ? string.Empty : barcode_details.Rank1;
+            //  var Rank = string.IsNullOrEmpty(barcode_details.Rank1) ? string.Empty : barcode_details.Rank1;
             var Country = string.IsNullOrEmpty(barcode_details.Country) ? string.Empty : barcode_details.Country;
             var DDR = string.IsNullOrEmpty(barcode_details.DDR) ? string.Empty : barcode_details.DDR;
             var Density = string.IsNullOrEmpty(barcode_details.Density) ? string.Empty : barcode_details.Density;
@@ -164,9 +164,11 @@ namespace Essencore
             var Latency = string.IsNullOrEmpty(barcode_details.Latency) ? string.Empty : barcode_details.Latency;
             //var YearWeek = GetSerialWeek(DateTime.Now);
             var YearWeek = barcode_details.WeekDetails.ToString();
-            var Latencyvoltage =$"{Latency} {Voltage}";
-            var combinedSerialNumber = $"{DDR} {DIMM} {Density} {DTR} {Rank}";
-            var QR = $"{Model}  {YearWeek} {cus_no}";
+           
+            var combinedSerialNumber = $"{DDR} - {DTR}";
+            var QR = cus_no;
+            var ModelBarcode = Model;
+
 
 
             if (Model != string.Empty && cus_no != string.Empty)
@@ -175,16 +177,19 @@ namespace Essencore
                 var externalValues = new Dictionary<string, string>
         {
             {"SerialNumber", cus_no  },
-            {"Model", Model },
+          //  {"Model", Model },
             {"DDR",combinedSerialNumber },
            // {"Density",Density },
           //  {"DIMM",DIMM },
             //{"DTR",DTR },
-            {"Latency",Latencyvoltage },
+            {"Latency",Latency },
           //  {"Rank",Rank },
             {"Country",Country },
             {"YEARWEEK",YearWeek },
             {"QR",QR },
+            {"Voltage",Voltage },
+            {"Density",Density},
+            {"ModelBarcode",ModelBarcode },
 
         };
 
@@ -278,14 +283,15 @@ namespace Essencore
 
                 string productNo = lblProductNo.Text.ToString();
                 int labelid = Convert.ToInt32(cmbProductType.SelectedValue);
-                var barcodedetails = getConn.GetBarcodeDetails(labelid);
-    
+                string Workorder = cmbWorkOrderNo.SelectedValue.ToString().Trim();
+                var barcodedetails = getConn.GetBarcodeDetails(labelid, Workorder);
+
 
                 // Column design changes 
                 dgvBarcodeDetails.ColumnHeadersDefaultCellStyle.Font = new Font("Arial", 10, FontStyle.Bold);
-  
+
                 dgvBarcodeDetails.ColumnHeadersDefaultCellStyle.BackColor = Color.LightBlue;
-             
+
 
                 foreach (DataGridViewColumn column in dgvBarcodeDetails.Columns)
                 {
@@ -432,6 +438,11 @@ namespace Essencore
         {
             //Application.Exit();
             this.Close();
+        }
+
+        private void lblBarcode_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
